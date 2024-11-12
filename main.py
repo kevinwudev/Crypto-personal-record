@@ -24,6 +24,7 @@ def save_data():
     return redirect(url_for('portfolio'))
 
 # 讀取 YAML 並顯示持倉資訊
+
 @app.route('/portfolio')
 def portfolio():
     with open('data.yaml', 'r') as file:
