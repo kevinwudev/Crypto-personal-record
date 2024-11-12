@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKX Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Crypto record</h1>
+        <p>A simple and clean HTML website</p>
+    </header>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#okx">OKX</a>
+    </nav>
+
+    <section id="home">
+        <h2>Home</h2>
+        <p>This is a simple website created using HTML and CSS. You can navigate through different sections using the navigation bar above.</p>
+    </section>
+
+    
+    <section id="okx">
+        <h2>OKX - Personal setting</h2>
+        <form action="/save" method="post">
+            <label for="username">OKX - API key:</label>
+            <input type="text" id="apiKey" name="apiKey" placeholder="Your apikey" required><br>
+
+            <label for="password">OKX - secret key:</label>
+            <input type="password" id="secret" name="secret" placeholder="Your secret key" required><br>
+
+            <label for="okx_secret">OKX password:</label>
+            <input type="text" id="password" name="password" placeholder="Your password" required><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    
+    <section id="portfolio">
+        <h2>Your OKX Portfolio</h2>
+        {% if message %}
+            <script>
+                // 如果有錯誤訊息，使用 JavaScript 顯示錯誤提示
+                showError("{{ message }}");
+            </script>
+        {% endif %}
+        
+        {% if table %}
+            <table border="1">
+                <tr>
+                    <th>Asset</th>
+                    <th>Position</th>
+                    <th>Entry Price</th>
+                    <th>Current Price</th>
+                    <th>Profit/Loss</th>
+                </tr>
+                {% for row in table %}
+                <tr>
+                    <td>{{ row['asset'] }}</td>
+                    <td>{{ row['position'] }}</td>
+                    <td>{{ row['entry_price'] }}</td>
+                    <td>{{ row['current_price'] }}</td>
+                    <td>{{ row['profit_loss'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No portfolio data available.</p>
+        {% endif %}
+    </section>
+</body>
+</html>

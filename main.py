@@ -1,74 +1,73 @@
+from flask import Flask, request, render_template, redirect, url_for
+import yaml
 import ccxt
-import polars as pl
-from typing import Dict, List
-import os
-from datetime import datetime
 
-def get_okx_client(api_key: str, secret: str, password: str) -> ccxt.okx:
-    """初始化OKX API客戶端"""
-    return ccxt.okx({
-        'apiKey': api_key,
-        'secret': secret,
-        'password': password,
-        'enableRateLimit': True
-    })
+app = Flask(__name__)
 
-def fetch_positions(exchange: ccxt.okx) -> List[Dict]:
-    """獲取持倉信息"""
-    positions = exchange.privateGetAccountPositions()['data']
-    return [
-        {
-            'symbol': pos['instId'],
-            'size': float(pos['pos']),
-            'entry_price': float(pos['avgPx']),
-            'current_price': float(pos['last']),
-            'unrealized_pnl': float(pos['upl']),
-            'margin': float(pos['margin']),
-            'leverage': float(pos['lever'])
-        }
-        for pos in positions if float(pos['pos']) != 0
-    ]
+# 根路徑的處理，返回登錄頁面
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-def create_portfolio_df(positions: List[Dict]) -> pl.DataFrame:
-    """將持倉數據轉換為Polars DataFrame並計算關鍵指標"""
-    if not positions:
-        return pl.DataFrame()
-    
-    df = pl.DataFrame(positions)
-    
-    return df.with_columns([
-        (pl.col('unrealized_pnl') / pl.col('margin') * 100).alias('pnl_percentage'),
-        (pl.col('current_price') - pl.col('entry_price')).alias('price_change'),
-        ((pl.col('current_price') - pl.col('entry_price')) / pl.col('entry_price') * 100).alias('price_change_percentage')
-    ]).sort('pnl_percentage', descending=True)
+# 儲存表單數據
+@app.route('/save', methods=['POST'])
+def save_data():
+    apiKey = request.form['apiKey']
+    secret = request.form['secret']
+    password = request.form['password']
 
-def main():
-    # 從環境變量讀取API憑證
-    api_key = os.getenv('OKX_API_KEY')
-    secret = os.getenv('OKX_SECRET')
-    password = os.getenv('OKX_PASSWORD')
-    
-    # 初始化交易所客戶端
-    exchange = get_okx_client(api_key, secret, password)
-    
-    # 獲取持倉數據
-    positions = fetch_positions(exchange)
-    
-    # 創建DataFrame並顯示結果
-    df = create_portfolio_df(positions)
-    if not df.is_empty():
-        print("\n=== Portfolio Analysis ===")
-        print(df.select([
-            'symbol',
-            'size',
-            'entry_price',
-            'current_price',
-            'unrealized_pnl',
-            'pnl_percentage',
-            'leverage'
-        ]))
-    else:
-        print("No active positions found.")
+    # 將數據寫入 YAML 文件
+    data = {'okx': {'apiKey': apiKey, 'secret': secret, 'password': password}}
+    with open('data.yaml', 'w') as file:
+        yaml.dump(data, file)
 
-if __name__ == "__main__":
-    main()
+    return redirect(url_for('portfolio'))
+
+# 讀取 YAML 並顯示持倉資訊
+@app.route('/portfolio')
+def portfolio():
+    with open('data.yaml', 'r') as file:
+        data = yaml.safe_load(file)
+        data = data['okx']
+
+    try :                                                                                                                                     # 初始化 OKX API
+        exchange = ccxt.okx({
+            'apiKey': data['apiKey'],
+            'secret': data['secret'],
+            'password': data['password']
+        })
+
+        exchange.load_markets()
+    
+        # exchange = ccxt.okx({
+        #     'apiKey': '0e1a38a4-60f6-4f6d-89c6-a2030ffa3b58',
+        #     'secret': '27626941CD32624B05D0283DC8E01F9E',
+        #     'password': 'Kuan-0725'
+        # })
+    
+        # 獲取持倉數據
+        positions = exchange.fetch_positions()
+    
+        # 將持倉數據轉換為表格
+        table = [
+            {
+                'asset': pos['symbol'],
+                'position': pos['contracts'],
+                'entry_price': pos['entryPrice'],
+                'current_price': pos['markPrice'],
+                'profit_loss': pos['unrealizedPnl']
+            }
+            for pos in positions if float(pos['info']['pos']) != 0
+        ]
+    
+    
+        # 傳遞表格到 HTML
+        return render_template('index.html', table=table)
+
+    except ccxt.BaseError as e:
+        # 如果 API 鑰匙無效，回傳錯誤信息
+        error_message = "Invalid API key or password. Please try again."
+        return render_template('index.html', message=error_message)
+
+if __name__ == '__main__':
+    app.run(debug=True)

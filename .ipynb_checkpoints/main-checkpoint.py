@@ -42,6 +42,8 @@ def create_portfolio_df(positions: List[Dict]) -> pl.DataFrame:
         ((pl.col('current_price') - pl.col('entry_price')) / pl.col('entry_price') * 100).alias('price_change_percentage')
     ]).sort('pnl_percentage', descending=True)
 
+
+
 def main():
     # 從環境變量讀取API憑證
     api_key = os.getenv('OKX_API_KEY')
@@ -69,6 +71,12 @@ def main():
         ]))
     else:
         print("No active positions found.")
+
+    html_output = df._repr_html_()
+    
+    # 將 HTML 寫入到文件中
+    with open("okx_positions.html", "w") as f:
+        f.write(html_output)
 
 if __name__ == "__main__":
     main()
