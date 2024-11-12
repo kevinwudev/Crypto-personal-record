@@ -1,3 +1,5 @@
 *.ipynb
+*.yaml
 .ipynb_checkpoints/
 tests/
+
