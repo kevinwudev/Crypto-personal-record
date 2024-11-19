@@ -4,4 +4,5 @@
 tests/
 __pycache__/
 *.pyc
+notation.md
 
