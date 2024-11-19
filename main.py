@@ -31,7 +31,8 @@ def portfolio():
         data = yaml.safe_load(file)
         data = data['okx']
 
-    try :                                                                                                                                     # 初始化 OKX API
+    try :                                                                                                                                     
+        # 初始化 OKX API
         exchange = ccxt.okx({
             'apiKey': data['apiKey'],
             'secret': data['secret'],
