@@ -2,4 +2,6 @@
 *.yaml
 .ipynb_checkpoints/
 tests/
+__pycache__/
+*.pyc
 
