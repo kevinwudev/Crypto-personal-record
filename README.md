@@ -1,20 +1,3 @@
-# usage
+# Access to the serveice
 
-## In other server
-- Display new conda env
-    
-    ```shell
-    conda env create -f environment.yml 
-    ```
-
-- Update new env
-
-    ```shell
-    conda env update -f environment.yml
-    ```
-
-- Set new requirements list
-
-    ```shell
-    pipreqs ./
-    ```
+[crypto-personal-service](https://crypto-personal-record.onrender.com/)
