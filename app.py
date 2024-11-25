@@ -55,9 +55,7 @@ def check_password(email : str, password : str) -> bool :
         user_info = yaml.safe_load(file)
         
         return password ==  user_info['user_password']
-    
-def check_all_keys_in_dict(setting_info : list, user_info : dict) -> bool:
-    return all(item in user_info for item in setting_info)
+
     
 @app.route('/')
 def home():
@@ -66,7 +64,7 @@ def home():
 
     try:
         user_info = get_user_info(session['email'])
-        if check_all_keys_in_dict(['OKX'], user_info):
+        if 'OKX' in user_info:
             apikey = user_info['OKX']['apikey']
             secret = user_info['OKX']['secret']
             password = user_info['OKX']['password']
