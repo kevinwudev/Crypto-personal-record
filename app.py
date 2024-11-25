@@ -64,16 +64,20 @@ def home():
 
     try:
         user_info = get_user_info(session['email'])
-        if 'OKX' in user_info:
+        if user_info is None:
+            return render_template('index.html')
+            
+        if user_info is not None and 'OKX' in user_info:
             apikey = user_info['OKX']['apikey']
             secret = user_info['OKX']['secret']
             password = user_info['OKX']['password']
 
             assets_info = get_info_table(apikey, secret, password)
+            return render_template('index.html', assets_info=assets_info)
 
         else :
             assets_info = None
-        return render_template('index.html', assets_info=assets_info)
+            return render_template('index.html', assets_info=assets_info)
 
     except ccxt.BaseError as e:
         # 如果 API 鑰匙無效，回傳錯誤信息
@@ -93,7 +97,6 @@ def login():
             return redirect(url_for('home'))
 
         else:
-            test = check_password(email=email, password=password)
             flash(f'Wrong email or password.', 'danger')
             return redirect(url_for('login'))
 
