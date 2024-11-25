@@ -66,7 +66,7 @@ def home():
 
     try:
         user_info = get_user_info(session['email'])
-        if check_all_keys_in_dict(['apikey', 'secret', 'password'], user_info['OKX']):
+        if check_all_keys_in_dict(['apikey', 'secret', 'password'], user_info['OKX']) and check_all_keys_in_dict(['OKX'], user_info):
             apikey = user_info['OKX']['apikey']
             secret = user_info['OKX']['secret']
             password = user_info['OKX']['password']
