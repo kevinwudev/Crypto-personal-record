@@ -55,3 +55,10 @@ form button {
 form button:hover {
     background-color: #45a049;
 }
+
+.assets-table {
+    width: 80%; /* 可以調整寬度 */
+    margin: 0 auto; /* 使表格水平居中 */
+    border-collapse: collapse; /* 合併表格邊框 */
+    text-align: center; /* 使表格內文字居中 */
+}

@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+{% block content %}
+<section>
+    <h2>OKX</h2>
+    <form method="POST" action="{{ url_for('settings') }}">
+        <div class="mb-3">
+            <label for="apikey" class="form-label">API Key</label>
+            <input type="text" name="apikey" class="form-control" id="apikey" value="{{ user_config.apikey or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="secret" class="form-label">Secret</label>
+            <input type="text" name="secret" class="form-control" id="secret" value="{{ user_config.secret or '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" id="password" value="{{ user_config.password or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</section>
+{% endblock %}
