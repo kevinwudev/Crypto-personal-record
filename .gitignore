@@ -1,6 +1,5 @@
 *.ipynb
 *.pyc
-users/*
 
 .ipynb_checkpoints/
 tests/

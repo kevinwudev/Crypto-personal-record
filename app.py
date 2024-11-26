@@ -71,10 +71,10 @@ def home():
             apikey = user_info['OKX']['apikey']
             secret = user_info['OKX']['secret']
             password = user_info['OKX']['password']
-
+    
             assets_info = get_info_table(apikey, secret, password)
             return render_template('index.html', assets_info=assets_info)
-
+    
         else :
             assets_info = None
             return render_template('index.html', assets_info=assets_info)
