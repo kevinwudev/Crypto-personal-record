@@ -1,5 +1,6 @@
 *.ipynb
 *.pyc
+users/*.yaml
 
 .ipynb_checkpoints/
 tests/

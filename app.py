@@ -59,30 +59,30 @@ def check_password(email : str, password : str) -> bool :
     
 @app.route('/')
 def home():
-    if 'email' not in session:
-        return redirect(url_for('login'))
-
-    # try:
-    user_info = get_user_info(session['email'])
-    if user_info is None:
-        return render_template('index.html')
+    try:
+        if 'email' not in session:
+            return redirect(url_for('login'))
         
-    if user_info is not None and 'OKX' in user_info:
-        apikey = user_info['OKX']['apikey']
-        secret = user_info['OKX']['secret']
-        password = user_info['OKX']['password']
+        user_info = get_user_info(session['email'])
+        if user_info is None:
+            return render_template('index.html')
+            
+        if user_info is not None and 'OKX' in user_info:
+            apikey = user_info['OKX']['apikey']
+            secret = user_info['OKX']['secret']
+            password = user_info['OKX']['password']
+        
+            assets_info = get_info_table(apikey, secret, password)
+            return render_template('index.html', assets_info=assets_info)
 
-        assets_info = get_info_table(apikey, secret, password)
-        return render_template('index.html', assets_info=assets_info)
+        else :
+            assets_info = None
+            return render_template('index.html', assets_info=assets_info)
 
-    else :
-        assets_info = None
-        return render_template('index.html', assets_info=assets_info)
-
-    # except ccxt.BaseError as e:
-    #     # 如果 API 鑰匙無效，回傳錯誤信息
-    #     error_message = "Invalid API key or password. Please try again."
-    #     return render_template('index.html', message=error_message)
+    except ccxt.BaseError as e:
+        # 如果 API 鑰匙無效，回傳錯誤信息
+        error_message = "Invalid API key or password. Please try again."
+        return render_template('index.html', message=error_message)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
