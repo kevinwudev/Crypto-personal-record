@@ -7,63 +7,31 @@ from okx_helper import get_info_table
 app = Flask(__name__)
 app.secret_key = b'\xa3\x1b5\xf7\x84\x7f\xe6*\xec\x8d\xb6*\xfe\xc5\xd3\x99\xad\x85\x1e\x91\x97\xd9\xfc\x0e'
 
-# 使用者資料存儲 (模擬資料庫)
-users = {}
 USER_FILES_DIR = 'users'
 
-# 確保使用者設定檔資料夾存在
-os.makedirs(USER_FILES_DIR, exist_ok=True)
-
-def update_user_config(email : str, new_info : dict):
-    '''讀取 YAML 設定檔'''
-    filepath = os.path.join(USER_FILES_DIR, f"{email}.yaml")
-    if os.path.exists(filepath):
+def read_user_config(new_info: dict = None):
+    '''讀取或更新 YAML 設定檔'''
+    filepath = os.path.join(USER_FILES_DIR, "personal_setting.yaml")
+    
+    # 如果檔案不存在，初始化為空字典
+    if not os.path.exists(filepath):
+        user_info = {}
+    else:
         with open(filepath, 'r') as file:
             user_info = yaml.safe_load(file) or {}
-        user_info.update(new_info)
 
+    # 如果提供了新資料，更新並儲存
+    if new_info:
+        user_info.update(new_info)
         with open(filepath, 'w') as file:
             yaml.safe_dump(user_info, file)
 
-def get_user_info(email : str) -> dict:
-    '''取得 USER info'''
-    filepath = os.path.join(USER_FILES_DIR, f"{email}.yaml")
-    if os.path.exists(filepath):
-        with open(filepath, 'r') as file:
-            user_info = yaml.safe_load(file) or {}
+    return user_info
 
-        return user_info
-
-
-def get_user_account() -> list:
-    user_files_dir = 'users'
-    
-    if not os.path.exists(user_files_dir):
-        return []
-    
-    account_list = [
-        os.path.splitext(f)[0] 
-        for f in os.listdir(user_files_dir)
-        if f.endswith('.yaml')
-    ]
-
-    return account_list
-    
-def check_password(email : str, password : str) -> bool :
-    filepath = os.path.join(USER_FILES_DIR, f"{email}.yaml")
-    with open(filepath, 'r') as file:
-        user_info = yaml.safe_load(file)
-        
-        return password ==  user_info['user_password']
-
-    
 @app.route('/')
 def home():
     try:
-        if 'email' not in session:
-            return redirect(url_for('login'))
-        
-        user_info = get_user_info(session['email'])
+        user_info = read_user_config()
         if user_info is None:
             return render_template('index.html')
             
@@ -84,78 +52,34 @@ def home():
         error_message = "Invalid API key or password. Please try again."
         return render_template('index.html', message=error_message)
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user_account : list = get_user_account()
-
-        if email in user_account and check_password(email, password):
-            session['email'] = email
-            flash('Successful login！', 'success')
-            return redirect(url_for('home'))
-
-        else:
-            flash(f'Wrong email or password.', 'danger')
-            return redirect(url_for('login'))
-
-    return render_template('login.html')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user_account : list = get_user_account()
-
-        if '@gmail.com' not in email:
-            flash('Please input available Gmail address！', 'warning')
-            return redirect(url_for('register'))
-
-        if email in user_account:
-            flash('This account has been registered.', 'danger')
-        else:
-            users['user_password'] = password
-            filepath = os.path.join(USER_FILES_DIR, f"{email}.yaml")
-            with open(filepath, 'w') as file:
-                yaml.safe_dump(users, file)
-        
-            flash('Successfully registered, please log in.', 'success')
-            return redirect(url_for('login'))
-
-    return render_template('register.html')
-
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    if 'email' not in session:
-        return redirect(url_for('login')) 
-
-    user_config = {'OKX' :{}}
+    
+    OKX_user_config = {'OKX' :{}}
     if request.method == 'POST':
         api_key = request.form['apikey']
         secret = request.form['secret']
         password = request.form['password']
         
-        user_config['OKX']['apikey'] = api_key
-        user_config['OKX']['secret'] = secret
-        user_config['OKX']['password'] = password
+        OKX_user_config = {
+            'OKX': {
+                'apikey': api_key,
+                'secret': secret,
+                'password': password
+            }
+        }
 
-        update_user_config(session['email'], user_config)
+        # 更新設定檔
+        read_user_config(OKX_user_config)
         flash('Personal setting updated successfully！', 'success')
         return redirect(url_for('settings'))
 
-    return render_template('settings.html', user_config=user_config)
+    # GET 請求時，讀取 YAML 設定
+    user_config = read_user_config()
+    OKX_user_config = user_config.get('OKX', {'apikey': '', 'secret': '', 'password': ''})
 
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    session.pop('email', None)
-    flash('Successfully log out.', 'success')
-    return redirect(url_for('login'))
+    return render_template('settings.html', OKX_user_config=OKX_user_config)
 
 
 if __name__ == '__main__':

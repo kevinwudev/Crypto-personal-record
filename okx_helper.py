@@ -8,21 +8,16 @@ def get_info_table(apikey, secret, password):
         'password': password,
     })
 
-    exchange.load_markets()
-
-    # 獲取持倉數據
-    positions = exchange.fetch_positions()
-
-    # 將持倉數據轉換為表格
-    table = [
+    positions = exchange.privateGetAccountPositions()['data']
+    return [
         {
-            'asset': pos['symbol'],
-            'position': pos['contracts'],
-            'entry_price': pos['entryPrice'],
-            'current_price': pos['markPrice'],
-            'profit_loss': pos['unrealizedPnl']
+            'symbol': pos['instId'],
+            'size': round(float(pos['pos']), 3),
+            'entry_price': round(float(pos['avgPx']), 3),
+            'current_price': round(float(pos['last']), 3),
+            'unrealized_pnl': round(float(pos['upl']), 3),
+            'margin': round(float(pos['margin']), 3),
+            'leverage': float(pos['lever'])
         }
-        for pos in positions if float(pos['info']['pos']) != 0
+        for pos in positions if float(pos['pos']) != 0
     ]
-
-    return table
