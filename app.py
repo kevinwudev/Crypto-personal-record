@@ -3,9 +3,17 @@ import os
 import yaml
 import ccxt
 from okx_helper import get_info_table
+import polars as pl
+import pyarrow
+from dotenv import load_dotenv
+import os
+
+# 加載 .env 文件中的環境變數
+load_dotenv()
+
 
 app = Flask(__name__)
-app.secret_key = b'\xa3\x1b5\xf7\x84\x7f\xe6*\xec\x8d\xb6*\xfe\xc5\xd3\x99\xad\x85\x1e\x91\x97\xd9\xfc\x0e'
+app.secret_key = os.getenv('app_secretkey')
 
 USER_FILES_DIR = 'users'
 
@@ -28,10 +36,23 @@ def read_user_config(new_info: dict = None):
 
     return user_info
 
+def generate_table():
+    # 創建一個 Polars DataFrame
+    df = pl.DataFrame({
+        "Name": ["Alice", "Bob", "Charlie"],
+        "Age": [25, 30, 35],
+        "City": ["New York", "Los Angeles", "Chicago"]
+    })
+
+    # 將 DataFrame 轉換為 HTML 表格
+    html_table = df.to_pandas().to_html(classes='table table-striped table-hover table-bordered text-center', index=False)
+    return html_table
+
 @app.route('/')
 def home():
     try:
         user_info = read_user_config()
+        table = generate_table()
         if user_info is None:
             return render_template('index.html')
             
@@ -40,17 +61,25 @@ def home():
             secret = user_info['OKX']['secret']
             password = user_info['OKX']['password']
         
-            assets_info = get_info_table(apikey, secret, password)
-            return render_template('index.html', assets_info=assets_info)
+            assets_info, total_porfolio = get_info_table(apikey, secret, password)
+            assets_info = assets_info.to_pandas().to_html(classes='table table-striped table-hover table-bordered text-center', 
+                                                          index=False)
+
+            return render_template('index.html', 
+                                   assets_info = assets_info, 
+                                   table = table, 
+                                   total_porfolio = total_porfolio)
 
         else :
-            assets_info = None
+            # assets_info = None
             return render_template('index.html', assets_info=assets_info)
 
     except ccxt.BaseError as e:
         # 如果 API 鑰匙無效，回傳錯誤信息
         error_message = "Invalid API key or password. Please try again."
         return render_template('index.html', message=error_message)
+
+    
 
 
 @app.route('/settings', methods=['GET', 'POST'])

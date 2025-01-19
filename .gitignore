@@ -1,12 +1,12 @@
 *.ipynb
 *.pyc
-users/*.yaml
 
 .ipynb_checkpoints/
 tests/
 __pycache__/
 other/
 
+.env
 
 
 
