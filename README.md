@@ -9,7 +9,7 @@ start with Linux
 ```
 bash start.sh
 ```
-It shall create the virtual env and download the necessary package, then we access to http://127.0.0.1:5000
+It shall create the virtual env and download the necessary package, then we access to the url.
 
 
 
