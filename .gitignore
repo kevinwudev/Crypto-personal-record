@@ -7,6 +7,7 @@ __pycache__/
 other/
 
 .env
+venv/
 
 
 

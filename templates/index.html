@@ -28,12 +28,6 @@
     
     <section id="portfolio">
         <h2>Your OKX Portfolio</h2>
-        {% if message %}
-            <script>
-                // 如果有錯誤訊息，使用 JavaScript 顯示錯誤提示
-                showError("{{ message }}");
-            </script>
-        {% endif %}
         
         {% if assets_info %}
         <div class="table-container">

@@ -36,23 +36,11 @@ def read_user_config(new_info: dict = None):
 
     return user_info
 
-def generate_table():
-    # 創建一個 Polars DataFrame
-    df = pl.DataFrame({
-        "Name": ["Alice", "Bob", "Charlie"],
-        "Age": [25, 30, 35],
-        "City": ["New York", "Los Angeles", "Chicago"]
-    })
-
-    # 將 DataFrame 轉換為 HTML 表格
-    html_table = df.to_pandas().to_html(classes='table table-striped table-hover table-bordered text-center', index=False)
-    return html_table
 
 @app.route('/')
 def home():
     try:
         user_info = read_user_config()
-        table = generate_table()
         if user_info is None:
             return render_template('index.html')
             
@@ -67,7 +55,6 @@ def home():
 
             return render_template('index.html', 
                                    assets_info = assets_info, 
-                                   table = table, 
                                    total_porfolio = total_porfolio)
 
         else :

@@ -1,7 +1,18 @@
-# Access to the service
+# Account book for your crypto currency
 
-- My free instance will spin down with inactivity, which can delay requests by 50 seconds or more.
+## Notice
+More features and exchange integrations and support in Windows version will be implemented in the future...
 
-- [crypto-personal-service](https://crypto-personal-record.onrender.com/)
+## How to start
+
+start with Linux
+```
+bash start.sh
+```
+It shall create the virtual env and download the necessary package, then we access to http://127.0.0.1:5000
+
+
+
+
 
 
